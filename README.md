@@ -14,29 +14,49 @@ launcher under the separate ID `com.pulipuli.applicationdashboardplus`.
   retain the upstream interface. Favorites use a separate namespace.
 - English, Traditional Chinese, Simplified Chinese and Japanese UI catalogs.
 
-## Install
+## Install a precompiled Release (recommended)
 
-Run these commands in a terminal **as your desktop user**:
+Open [GitHub Releases](https://github.com/pulipulichen/kde-application-dashboard-plus/releases)
+and download **application-dashboard-plus-kubuntu24.04-amd64.tar.gz** from the newest
+completed build. Extract it, open the extracted folder in a terminal, then run:
 
 ```bash
-git clone https://github.com/pulipulichen/kde-application-dashboard-plus.git
-cd kde-application-dashboard-plus
-./install-deps.sh
 ./install.sh
 ```
 
-`install-deps.sh` uses sudo to install build dependencies. `install.sh` builds and
-tests a small Qt 5 native QML plugin, compiles translations, packages the widget,
-and installs it for your user using `kpackagetool5`. It never restarts Plasma.
-The native plugin is contained inside the widget, without system-wide libraries
-or a background service. Build tools: C++17 compiler, CMake, Qt 5.15 development
-packages, KF5WindowSystem development package, gettext and Python 3.
+The archive includes the compiled native plugin and translations. Installing it
+needs no compiler, CMake, sudo, apt update, development packages, or network access.
+It uses the Plasma 5 runtime already installed on Kubuntu. Do not run it as root.
+Prebuilt releases currently target **amd64 / Kubuntu 24.04 / Plasma 5.27 / X11**.
+
+If you already cloned this repository:
+
+```bash
+git pull --ff-only
+./install.sh
+```
+
+Without a bundled package, the installer downloads the newest complete Release
+(including development prereleases) and verifies its SHA-256 checksum. It does
+not compile locally. You do not need to run `install-deps.sh` for normal installation.
+
+The standalone `.plasmoid` is also available as a Release asset:
+
+```bash
+./install.sh --package /path/to/application-dashboard-plus-kubuntu24.04-amd64.plasmoid
+```
 
 Right-click your panel → **Add Widgets** → search for **Application Dashboard
 Plus**, then add it. Alternatively use **Show Alternatives** on your launcher
-if offered. Keep the original launcher until you have checked the new one.
-The regular Plasma/Kicker runtime packages must remain installed. You can set
-the widget's keyboard shortcut in its normal Plasma configuration dialog.
+if offered. You can set its keyboard shortcut in the normal Plasma configuration.
+The original KDE launcher remains installed.
+
+## GitHub Actions builds
+
+Pushes to `main`, version tags, and manual workflow runs build on **ubuntu-24.04**,
+run the Qt and package checks, then publish a `.plasmoid`, an installer `.tar.gz`,
+and `SHA256SUMS` directly to **Releases**. No Actions artifacts are uploaded.
+Development builds get unique prerelease tags; version tags get matching Releases.
 
 ## Use
 
@@ -69,11 +89,18 @@ After updating a widget whose native plugin has already been loaded, **log out
 and back in** to load the new binary. Uninstall only removes this widget; it
 preserves user configuration and other launchers.
 
-## Build and validation
+## Build from source (developers only)
 
 ```bash
+./install-deps.sh
 ./build.sh
+# Optional: install your locally compiled package
+./install.sh --build
 ```
+
+Only this developer path needs CMake, a C++17 compiler, Qt 5.15 development
+packages, KF5WindowSystem development headers, gettext and Python 3. The
+`install-deps.sh` script uses sudo and apt to install those build dependencies.
 
 Output: `dist/application-dashboard-plus.plasmoid`. Build it on the target
 architecture (the native library is architecture specific). The archive root

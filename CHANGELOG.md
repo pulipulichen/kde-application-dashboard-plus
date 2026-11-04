@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.1.1 — 2026-11-05 — Precompiled Release installation
+
+Observed user installation failure: an unrelated Pinta PPA returned `403 Forbidden`
+during `apt-get update`. Because install-deps.sh stops on errors, build dependencies
+were not installed, and install.sh then reported `Missing dependency: cmake`.
+The default local-build installation flow was unsuitable for end users.
+
+- Add an ubuntu-24.04 GitHub Actions job to build/test and publish directly to
+  Releases, without Actions artifact storage. Main/manual builds use unique
+  prerelease tags; version tags publish matching Releases.
+- Publish the amd64 .plasmoid, a self-contained installer .tar.gz, and SHA256SUMS.
+- Default install.sh to the bundled prebuilt package or a checksum-verified
+  download of the newest complete Release. No local compilation or apt update.
+- Keep explicit `--build` for developers and `--package FILE` for local packages.
+- Document archive extraction and ./install.sh as the recommended installation.
+- Preserve existing apt sources; this change does not modify the user's Pinta
+  or duplicate Cursor repositories.
+
+Validation: shell syntax, YAML structure, Release selection/checksum logic and
+local installer archive checks are performed before publication. The first
+GitHub Actions run and published assets will be verified after pushing.
+
 ## 0.1.0 — 2026-11-05
 
 Initial Plasma 5.27 / Qt 5.15 / X11 implementation for Kubuntu 24.04.

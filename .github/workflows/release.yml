@@ -1,0 +1,77 @@
+name: Build Plasma 5 package and publish Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths-ignore: ['README.md', 'CHANGELOG.md', 'tests/MANUAL.md']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build and Plasma 5 runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake qtbase5-dev qtdeclarative5-dev \
+            libkf5windowsystem-dev gettext python3 \
+            plasma-workspace plasma-desktop qml-module-qtquick-controls2
+      - name: Build, test, and package
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QT_QUICK_BACKEND: software
+        run: |
+          python3 tests/test-download-release.py
+          ./build.sh
+          ./package-release.sh
+      - name: Publish downloadable packages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          widget=dist/application-dashboard-plus-kubuntu24.04-amd64.plasmoid
+          installer=dist/application-dashboard-plus-kubuntu24.04-amd64.tar.gz
+          test -s "$widget"
+          test -s "$installer"
+          test -s dist/SHA256SUMS
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            release_tag="$GITHUB_REF_NAME"
+            release_options=(--verify-tag)
+          else
+            release_tag="build-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}-${GITHUB_SHA:0:7}"
+            release_options=(--target "$GITHUB_SHA" --prerelease)
+          fi
+          cat > /tmp/release-notes.md <<'NOTES'
+          Precompiled for Kubuntu 24.04 / Plasma 5.27 / Qt 5.15 / X11 / amd64.
+
+          Download the **.tar.gz**, extract it, open the extracted directory and run:
+
+          ```bash
+          ./install.sh
+          ```
+
+          No CMake, compiler, development packages, sudo, or apt update is needed.
+          Then add **Application Dashboard Plus** from Plasma's Add Widgets.
+
+          The **.plasmoid** is also available for direct `kpackagetool5` installation.
+          SHA256SUMS covers both files. Log out/in after updating an already loaded native plugin.
+          NOTES
+          printf '\nSource commit: %s\n' "$GITHUB_SHA" >> /tmp/release-notes.md
+          gh release create "$release_tag" "$widget" "$installer" dist/SHA256SUMS \
+            --repo "$GITHUB_REPOSITORY" "${release_options[@]}" \
+            --title "Dashboard Plus — $release_tag" --notes-file /tmp/release-notes.md
+          printf 'Release: https://github.com/%s/releases/tag/%s\n' "$GITHUB_REPOSITORY" "$release_tag" >> "$GITHUB_STEP_SUMMARY"
