@@ -19,8 +19,23 @@ The default local-build installation flow was unsuitable for end users.
   or duplicate Cursor repositories.
 
 Validation: shell syntax, YAML structure, Release selection/checksum logic and
-local installer archive checks are performed before publication. The first
-GitHub Actions run and published assets will be verified after pushing.
+local installer archive checks are performed before publication. GitHub Actions run #1 succeeded:
+https://github.com/pulipulichen/kde-application-dashboard-plus/actions/runs/41903603658
+
+Build source commit: `776835d1df7efc758a600b13fa89fd7bf81e6ed3`.
+The native Qt suite, three downloader unit tests, package checks and translation
+compilation passed on the hosted ubuntu-24.04 runner. Release publishing passed.
+
+Verified published Release:
+https://github.com/pulipulichen/kde-application-dashboard-plus/releases/tag/build-1-1-776835d
+
+Assets confirmed through the GitHub Releases API:
+- application-dashboard-plus-kubuntu24.04-amd64.plasmoid — 621277 bytes
+- application-dashboard-plus-kubuntu24.04-amd64.tar.gz — 633348 bytes
+- SHA256SUMS — 240 bytes
+
+Real KWin/IME/multi-monitor desktop acceptance checks remain as documented in
+`tests/MANUAL.md`; CI publication does not replace those checks.
 
 ## 0.1.0 — 2026-11-05
 
