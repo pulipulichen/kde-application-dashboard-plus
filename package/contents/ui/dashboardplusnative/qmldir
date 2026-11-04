@@ -1,0 +1,2 @@
+# Directory URI depends on the installed package path; registerTypes uses that URI.
+plugin dashboardplusplugin

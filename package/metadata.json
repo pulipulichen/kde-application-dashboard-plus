@@ -1,0 +1,38 @@
+{
+    "KPlugin": {
+        "Id": "com.pulipuli.applicationdashboardplus",
+        "Name": "Application Dashboard Plus",
+        "Name[zh_TW]": "應用程式儀表板 Plus",
+        "Name[zh_CN]": "应用程序仪表板 Plus",
+        "Name[ja]": "アプリケーションダッシュボード Plus",
+        "Description": "Fullscreen launcher with Chinese input and one open dashboard",
+        "Description[zh_TW]": "支援中文輸入與單一選單開啟的全螢幕啟動器",
+        "Description[zh_CN]": "支持中文输入与单一菜单开启的全屏启动器",
+        "Description[ja]": "中国語入力と単一表示に対応した全画面ランチャー",
+        "Icon": "start-here-kde",
+        "Version": "0.1.0",
+        "License": "GPL-3.0-or-later",
+        "Category": "Application Launchers",
+        "ServiceTypes": [
+            "Plasma/Applet"
+        ],
+        "EnabledByDefault": true,
+        "Authors": [
+            {
+                "Name": "Yung-Ting Chen"
+            },
+            {
+                "Name": "Eike Hein",
+                "Email": "hein@kde.org"
+            }
+        ],
+        "Website": "https://github.com/pulipulichen/kde-application-dashboard-plus",
+        "BugReportUrl": "https://github.com/pulipulichen/kde-application-dashboard-plus/issues"
+    },
+    "X-Plasma-API": "declarativeappletscript",
+    "X-Plasma-MainScript": "ui/main.qml",
+    "X-Plasma-Provides": [
+        "org.kde.plasma.launchermenu"
+    ],
+    "X-Plasma-API-Minimum-Version": "5.27"
+}
