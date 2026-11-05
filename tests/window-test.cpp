@@ -17,7 +17,9 @@ class WindowTest : public QObject {
         c.setData(QByteArray("import QtQuick 2.15\nimport \"") + QUrl::fromLocalFile(NATIVE_IMPORT_DIR).toEncoded() + "\" 1.0 as Plus\n"
             "Plus.DashboardWindow { id: win; width: 500; height: 300;"
             " property alias text: editor.text; property alias preedit: editor.preeditText;"
-            " keyEventProxy: editor; mainItem: Item { width: win.width; height: win.height;"
+            " property alias firstFavorite: favorite; property alias searchEditor: editor;"
+            " keyEventProxy: editor; mainItem: FocusScope { width: win.width; height: win.height; focus: true;"
+            " Item { id: favorite; focus: true; Keys.onRightPressed: event => { event.accepted = true; } }"
             " TextInput { id: editor; width: 400; height: 60 } } }", QUrl::fromLocalFile("/test.qml"));
         for (int i = 0; c.isLoading() && i < 500; ++i) QTest::qWait(10);
         auto result = std::unique_ptr<QObject>(c.create());
@@ -86,13 +88,31 @@ private Q_SLOTS:
         QVERIFY(!w->isVisible());
         toggle(a.get()); QVERIFY(w->isVisible());
     }
+    void initialFavoriteFocusAndTyping() {
+        QQmlEngine e;
+        auto a = makeWindow(e); QVERIFY(a);
+        auto w = qobject_cast<QQuickWindow *>(a.get());
+        auto favorite = a->property("firstFavorite").value<QQuickItem *>();
+        auto editor = a->property("searchEditor").value<QQuickItem *>();
+        QVERIFY(favorite); QVERIFY(editor);
+        toggle(a.get());
+        QTRY_COMPARE(w->activeFocusItem(), favorite);
+        // Arrow keys navigate the favorite rather than activating the search box.
+        QTest::keyClick(w, Qt::Key_Right);
+        QCOMPARE(w->activeFocusItem(), favorite);
+        QTest::keyClick(w, Qt::Key_A);
+        QCOMPARE(w->activeFocusItem(), editor);
+        QCOMPARE(a->property("text").toString(), QStringLiteral("a"));
+    }
     void chineseCompositionAndFocus() {
         QQmlEngine e;
         auto a = makeWindow(e); QVERIFY(a);
         auto w = qobject_cast<QQuickWindow *>(a.get());
         toggle(a.get());
-        QTRY_VERIFY(w->activeFocusItem());
-        auto editor = w->activeFocusItem();
+        auto editor = a->property("searchEditor").value<QQuickItem *>();
+        QVERIFY(editor);
+        editor->forceActiveFocus();
+        QTRY_COMPARE(w->activeFocusItem(), editor);
         QInputMethodEvent preedit(QString::fromUtf8("ㄓㄨㄥ"), {});
         QCoreApplication::sendEvent(editor, &preedit);
         QCOMPARE(a->property("text").toString(), QString());
@@ -103,8 +123,9 @@ private Q_SLOTS:
         QCOMPARE(a->property("text").toString(), QString::fromUtf8("中文"));
         QVERIFY(editor->hasActiveFocus());
         // Typing after grid navigation moves focus to the real search editor.
-        auto grid = new QQuickItem(w->contentItem());
-        grid->forceActiveFocus();
+        auto favorite = a->property("firstFavorite").value<QQuickItem *>();
+        QVERIFY(favorite);
+        favorite->forceActiveFocus();
         QTest::keyClick(w, Qt::Key_A);
         QCOMPARE(w->activeFocusItem(), editor);
         QCOMPARE(a->property("text").toString(), QString::fromUtf8("中文a"));
