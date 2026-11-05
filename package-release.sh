@@ -19,7 +19,8 @@ In this extracted folder, open a terminal and run:
 
 No compiler, CMake, sudo, apt update, or network access is required.
 Add Application Dashboard Plus from Plasma's Add Widgets afterward.
-Log out and back in after updating an already loaded native plugin.
+Installer restarts Plasma Shell automatically after installation (no logout needed).
+Use ./install.sh --no-restart to skip the desktop restart.
 To uninstall: ./uninstall.sh
 
 Source and updates:

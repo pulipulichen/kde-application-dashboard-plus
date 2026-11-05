@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.3 — 2026-11-05 — Reload Plasma Shell automatically after install/update
+
+- Restart only the user's Plasma Shell after a successful installation or update,
+  keeping other applications running and avoiding a full KDE logout/login.
+- Prefer `systemctl --user restart plasma-plasmashell.service` when it is an
+  active user service; otherwise request `plasmashell --replace` for an existing
+  shell process. Skip desktop reloads when running without a graphical session.
+- Allow `./install.sh --no-restart` and `./update.sh --no-restart` (including
+  alongside `--build` or `--package FILE`) for troubleshooting or remote use.
+- Add installer restart regression tests, document behavior, and update the
+  Release bundle instructions.
+
+
 ## 0.1.2 — 2026-11-05 — Fix dashboard window activation
 
 A Kubuntu 24.04 / Plasma 5.27.12 / X11 report showed that the launcher icon was

@@ -9,15 +9,24 @@ for tool in kpackagetool5 plasmashell; do
 done
 plasma_version="$(env -u SESSION_MANAGER plasmashell --version)"
 [[ $plasma_version == *' 5.27.'* ]] || { echo "Unsupported: $plasma_version. This release targets Plasma 5.27." >&2; exit 1; }
+restart_plasma=true
+args=()
+for arg in "$@"; do
+    case "$arg" in
+        --no-restart) restart_plasma=false ;;
+        *) args+=("$arg") ;;
+    esac
+done
+set -- "${args[@]}"
 package=''
 case "${1:-}" in
     --build)
-        [[ $# -eq 1 ]] || { echo 'Usage: ./install.sh [--build | --package FILE]' >&2; exit 1; }
+        [[ $# -eq 1 ]] || { echo 'Usage: ./install.sh [--build | --package FILE] [--no-restart]' >&2; exit 1; }
         "$project_dir/build.sh"
         package="$project_dir/dist/application-dashboard-plus.plasmoid"
         ;;
     --package)
-        [[ $# -eq 2 ]] || { echo 'Usage: ./install.sh --package FILE' >&2; exit 1; }
+        [[ $# -eq 2 ]] || { echo 'Usage: ./install.sh --package FILE [--no-restart]' >&2; exit 1; }
         package="$2"
         ;;
     '')
@@ -32,7 +41,7 @@ case "${1:-}" in
             package="$(python3 "$project_dir/download-release.py" "$download_dir")"
         fi
         ;;
-    *) echo 'Usage: ./install.sh [--build | --package FILE]' >&2; exit 1 ;;
+    *) echo 'Usage: ./install.sh [--build | --package FILE] [--no-restart]' >&2; exit 1 ;;
 esac
 [[ -s "$package" ]] || { echo "Package not found or empty: $package" >&2; exit 1; }
 if kpackagetool5 --type Plasma/Applet --show "$plugin_id" >/dev/null 2>&1; then
@@ -40,4 +49,30 @@ if kpackagetool5 --type Plasma/Applet --show "$plugin_id" >/dev/null 2>&1; then
 else
     kpackagetool5 --type Plasma/Applet --install "$package"
 fi
-printf '\nInstalled Application Dashboard Plus. Add it from Add Widgets or Show Alternatives.\nLog out and back in after updating a loaded native plugin. Your desktop was not restarted.\n'
+restart_plasma_shell() {
+    if [[ $restart_plasma == false ]]; then
+        echo 'Plasma Shell restart skipped (--no-restart).'
+        return
+    fi
+    if [[ -z "${DISPLAY:-}" && -z "${WAYLAND_DISPLAY:-}" ]]; then
+        echo 'No graphical session detected; Plasma Shell restart skipped.'
+        return
+    fi
+    if command -v systemctl >/dev/null 2>&1 && systemctl --user is-active --quiet plasma-plasmashell.service; then
+        if systemctl --user restart plasma-plasmashell.service; then
+            echo 'Plasma Shell restarted; no logout is required.'
+            return
+        fi
+        echo 'The Plasma Shell user service could not be restarted; trying --replace.' >&2
+    fi
+    if command -v pgrep >/dev/null 2>&1 && pgrep -u "$(id -u)" -x plasmashell >/dev/null 2>&1; then
+        nohup plasmashell --replace </dev/null >/dev/null 2>&1 &
+        disown || true
+        echo 'Requested a Plasma Shell replacement; no logout is required.'
+    else
+        echo 'No running Plasma Shell found; restart skipped.'
+        echo 'If the widget still appears outdated, run: systemctl --user restart plasma-plasmashell.service'
+    fi
+}
+printf '\nInstalled Application Dashboard Plus. Add it from Add Widgets or Show Alternatives.\n'
+restart_plasma_shell

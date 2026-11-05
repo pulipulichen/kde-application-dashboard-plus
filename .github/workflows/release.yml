@@ -35,6 +35,7 @@ jobs:
           QT_QUICK_BACKEND: software
         run: |
           python3 tests/test-download-release.py
+          python3 tests/test-installer-restart.py
           ./build.sh
           ./package-release.sh
       - name: Publish downloadable packages
@@ -68,7 +69,8 @@ jobs:
           Then add **Application Dashboard Plus** from Plasma's Add Widgets.
 
           The **.plasmoid** is also available for direct `kpackagetool5` installation.
-          SHA256SUMS covers both files. Log out/in after updating an already loaded native plugin.
+          SHA256SUMS covers both files. The installer restarts Plasma Shell automatically
+          after installation, without logging out. Use `./install.sh --no-restart` to skip.
           NOTES
           printf '\nSource commit: %s\n' "$GITHUB_SHA" >> /tmp/release-notes.md
           gh release create "$release_tag" "$widget" "$installer" dist/SHA256SUMS \

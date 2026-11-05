@@ -26,6 +26,10 @@ completed build. Extract it, open the extracted folder in a terminal, then run:
 
 The archive includes the compiled native plugin and translations. Installing it
 needs no compiler, CMake, sudo, apt update, development packages, or network access.
+By default, the installer reloads **Plasma Shell** after successful installation,
+so there is no need to log out. Your open applications are not closed; the
+panel and widgets briefly disappear while Plasma Shell restarts. On systems
+without an active graphical session, restart is skipped.
 It uses the Plasma 5 runtime already installed on Kubuntu. Do not run it as root.
 Prebuilt releases currently target **amd64 / Kubuntu 24.04 / Plasma 5.27 / X11**.
 
@@ -85,9 +89,15 @@ method's candidate popup can work without fighting the launcher.
 ```
 
 Update requires a clean `main` checkout and uses `git pull --ff-only`.
-After updating a widget whose native plugin has already been loaded, **log out
-and back in** to load the new binary. Uninstall only removes this widget; it
-preserves user configuration and other launchers.
+Both `./install.sh` and `./update.sh` automatically restart Plasma Shell after
+a successful install/update to reload QML and the native plugin, without
+logging out. To leave Plasma Shell running (for example, when installing
+remotely or while debugging), use `./install.sh --no-restart` or
+`./update.sh --no-restart`. `--no-restart` also works with `--package FILE`
+and `--build`. If the user service is inactive, the installer requests
+`plasmashell --replace`; headless installations skip the restart.
+Uninstall only removes this widget; it preserves user configuration and other
+launchers.
 
 ## Build from source (developers only)
 
