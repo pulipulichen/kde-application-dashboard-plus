@@ -97,7 +97,8 @@ bool DashboardWindow::event(QEvent *e)
             KWindowSystem::setState(winId(), NET::SkipTaskbar | NET::SkipPager | NET::SkipSwitcher);
             KWindowEffects::enableBlurBehind(this, true);
         }
-        if (m_keyEventProxy) m_keyEventProxy->forceActiveFocus(Qt::OtherFocusReason);
+        // Initial keyboard focus is chosen by DashboardRepresentation.qml.
+        // Keep the search editor inactive until the user starts typing.
     } else if (e->type() == QEvent::Hide && s_openWindow == this) {
         s_openWindow.clear();
     }
