@@ -24,8 +24,19 @@ Item {
         && plasmoid.configuration.customButtonImage.length !== 0)
 
     readonly property Component dashWindowComponent: kicker.isDash ? Qt.createComponent(Qt.resolvedUrl("./DashboardRepresentation.qml"), root) : null
-    readonly property DashboardPlus.DashboardWindow dashWindow: dashWindowComponent && dashWindowComponent.status === Component.Ready
+    // Qt.createComponent() produces a QML-derived DashboardWindow runtime type.
+    // A strictly typed DashboardWindow property rejects that QML subtype on Qt 5.27.
+    readonly property var dashWindow: dashWindowComponent && dashWindowComponent.status === Component.Ready
         ? dashWindowComponent.createObject(root, { visualParent: root }) : null
+
+    function toggleDashboard() {
+        if (!root.dashWindow) {
+            console.error("Application Dashboard Plus: dashboard window is unavailable; check QML loading errors.")
+            return
+        }
+        root.dashWindow.toggle()
+        justOpenedTimer.start()
+    }
 
     onWidthChanged: updateSizeHints()
     onHeightChanged: updateSizeHints()
@@ -113,8 +124,7 @@ Item {
 
         onClicked: {
             if (kicker.isDash) {
-                root.dashWindow.toggle();
-                justOpenedTimer.start();
+                root.toggleDashboard();
             } else {
                 plasmoid.expanded = !wasExpanded;
             }
@@ -123,11 +133,10 @@ Item {
 
     Connections {
         target: plasmoid
-        enabled: kicker.isDash && root.dashWindow !== null
+        enabled: kicker.isDash && !!root.dashWindow
 
         function onActivated() {
-            root.dashWindow.toggle();
-            justOpenedTimer.start();
+            root.toggleDashboard();
         }
     }
 }

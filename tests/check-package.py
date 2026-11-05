@@ -18,6 +18,13 @@ for name in ('main.qml', 'ConfigGeneral.qml'):
 for path in package.rglob('*.qml'):
     for local_import in re.findall(r'^import "([^"]+)"', path.read_text(), re.M):
         assert (path.parent / local_import).exists(), (path, local_import)
+# A dynamically created QML DashboardWindow cannot bind to a strictly typed
+# DashboardWindow property in Plasma 5.27; activation must also be null-safe.
+compact = (package / 'contents/ui/CompactRepresentation.qml').read_text()
+assert 'readonly property var dashWindow:' in compact
+assert 'readonly property DashboardPlus.DashboardWindow dashWindow:' not in compact
+assert 'function toggleDashboard()' in compact
+assert compact.count('root.toggleDashboard();') == 2
 # All source strings and context strings must be present in every locale.
 strings = set()
 for path in package.rglob('*'):

@@ -6,6 +6,8 @@
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QInputMethodEvent>
+#include <QTemporaryDir>
+#include <QFile>
 #include <memory>
 
 class WindowTest : public QObject {
@@ -24,6 +26,37 @@ class WindowTest : public QObject {
     }
     void toggle(QObject *w) { QVERIFY(QMetaObject::invokeMethod(w, "toggle")); }
 private Q_SLOTS:
+
+    void dynamicDashboardWindowProperty() {
+        // Regression: a QML-derived native window created dynamically could
+        // not be assigned to a strictly typed DashboardWindow property in Qt 5.
+        QTemporaryDir directory;
+        QVERIFY(directory.isValid());
+        QFile child(directory.filePath("DashboardDerived.qml"));
+        QVERIFY(child.open(QIODevice::WriteOnly));
+        const QByteArray childSource = QByteArray("import QtQuick 2.15\nimport \"")
+            + QUrl::fromLocalFile(NATIVE_IMPORT_DIR).toEncoded()
+            + "\" 1.0 as DashboardPlus\nDashboardPlus.DashboardWindow { }\n";
+        QCOMPARE(child.write(childSource), qint64(childSource.size()));
+        child.close();
+
+        QQmlEngine engine;
+        QQmlComponent parentComponent(&engine);
+        const QByteArray parentSource = QByteArray("import QtQuick 2.15\nItem {\n"
+            " readonly property Component dashWindowComponent: Qt.createComponent(\"")
+            + QUrl::fromLocalFile(child.fileName()).toEncoded()
+            + "\")\n"
+            " readonly property var dashWindow: dashWindowComponent && dashWindowComponent.status === Component.Ready "
+            "? dashWindowComponent.createObject(this) : null\n}\n";
+        parentComponent.setData(parentSource, QUrl::fromLocalFile(directory.filePath("TestParent.qml")));
+        for (int i = 0; parentComponent.isLoading() && i < 500; ++i) QTest::qWait(10);
+        QVERIFY2(parentComponent.isReady(), qPrintable(parentComponent.errorString()));
+        std::unique_ptr<QObject> parent(parentComponent.create());
+        QVERIFY2(parent, qPrintable(parentComponent.errorString()));
+        QObject *window = parent->property("dashWindow").value<QObject *>();
+        QVERIFY2(window, "Dynamically created QML DashboardWindow must be assignable to var");
+        QVERIFY(qobject_cast<QQuickWindow *>(window));
+    }
     void dashboardComponentLoads() {
         QQmlEngine engine;
         QQmlComponent c(&engine, QUrl::fromLocalFile(DASHBOARD_QML_PATH));

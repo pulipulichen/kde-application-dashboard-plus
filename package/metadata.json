@@ -10,7 +10,7 @@
         "Description[zh_CN]": "支持中文输入与单一菜单开启的全屏启动器",
         "Description[ja]": "中国語入力と単一表示に対応した全画面ランチャー",
         "Icon": "start-here-kde",
-        "Version": "0.1.1",
+        "Version": "0.1.2",
         "License": "GPL-3.0-or-later",
         "Category": "Application Launchers",
         "ServiceTypes": [

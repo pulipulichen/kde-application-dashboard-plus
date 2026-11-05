@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.1.2 — 2026-11-05 — Fix dashboard window activation
+
+A Kubuntu 24.04 / Plasma 5.27.12 / X11 report showed that the launcher icon was
+present, but clicking it opened no dashboard. The plasmoid log identified:
+
+`CompactRepresentation.qml:27:5: Unable to assign DashboardRepresentation_QMLTYPE_* to DashboardWindow`
+
+- Store the dynamically instantiated QML-derived window in a `var` property,
+  rather than a strictly declared C++ `DashboardWindow` type.
+- Route mouse and keyboard activation through one guarded toggle function,
+  avoiding a secondary JavaScript exception when window creation fails.
+- Add a Qt QML regression case for the dynamic derived-window assignment and
+  a package check for the launcher property and guarded activation paths.
+- Rebuild and publish precompiled Plasma 5 assets to GitHub Releases. Existing
+  users should log out and in after upgrading to unload the previous native plugin.
+
+
 ## 0.1.1 — 2026-11-05 — Precompiled Release installation
 
 Observed user installation failure: an unrelated Pinta PPA returned `403 Forbidden`
