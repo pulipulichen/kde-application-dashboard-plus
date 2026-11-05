@@ -59,7 +59,8 @@ DashboardPlus.DashboardWindow {
 
         if (visible) {
             preloadAllAppsTimer.restart();
-            Qt.callLater(function() { if (root.visible) searchField.forceActiveFocus(); });
+            // Wait for the window to be shown before selecting the first favorite.
+            Qt.callLater(function() { if (root.visible) root.focusInitialItem(); });
         }
     }
 
@@ -76,6 +77,22 @@ DashboardPlus.DashboardWindow {
         }
     }
 
+    function focusInitialItem() {
+        if (globalFavoritesGrid.enabled && globalFavoritesGrid.count > 0) {
+            globalFavoritesGrid.tryActivate(0, 0);
+            globalFavoritesGrid.forceActiveFocus();
+        } else if (systemFavoritesGrid.count > 0) {
+            systemFavoritesGrid.tryActivate(0, 0);
+            systemFavoritesGrid.forceActiveFocus();
+        } else if (mainGrid.count > 0 && mainGridContainer.visible) {
+            mainGrid.tryActivate(0, 0);
+            mainGrid.forceActiveFocus();
+        } else {
+            // Empty favorites: keep navigation on categories, not the search box.
+            filterListScrollArea.forceActiveFocus();
+        }
+    }
+
     function reset() {
         searchField.clear();
         globalFavoritesGrid.currentIndex = -1;
@@ -84,7 +101,6 @@ DashboardPlus.DashboardWindow {
         funnelModel.sourceModel = rootModel.modelForRow(0);
         mainGrid.model = (tabBar.activeTab === 0) ? funnelModel : root.widgetExplorer.widgetsModel;
         mainGrid.currentIndex = -1;
-        if (root.visible) searchField.forceActiveFocus();
         filterList.model = (tabBar.activeTab === 0) ? rootModel : root.widgetExplorer.filterModel;
     }
 
