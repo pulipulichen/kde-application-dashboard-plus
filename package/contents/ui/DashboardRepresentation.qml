@@ -267,11 +267,11 @@ DashboardPlus.DashboardWindow {
         PC3.TextField {
             id: searchField
             objectName: "dashboardSearchField"
-            // Match the center Applications column's horizontal bounds.
+            // Match the Applications section's text and underline bounds.
             // mainColumn is a child of middleRow, so convert its x to rootItem coordinates.
             x: middleRow.x + mainColumn.x
             y: (middleRow.anchors.topMargin / 2) - height / 2
-            width: mainColumn.width
+            width: mainColumnLabelUnderline.width
             font.pointSize: dummyHeading.font.pointSize * 1.3
             placeholderText: i18n("Type to search…")
             Accessible.name: placeholderText

@@ -24,7 +24,7 @@ assert 'border.width: 0' in search_field
 assert 'searchField.activeFocus ? 1 : 0' not in search_field
 # The search box must track the Applications grid when screen size changes.
 assert 'x: middleRow.x + mainColumn.x' in search_field
-assert 'width: mainColumn.width' in search_field
+assert 'width: mainColumnLabelUnderline.width' in search_field
 assert 'anchors.horizontalCenter: parent.horizontalCenter' not in search_field
 # The clear affordance must be an accessible, keyboard-operable circle/X.
 clear_button = dashboard.split('id: cancelSearchButton', 1)[1].split('id: middleRow', 1)[0]
