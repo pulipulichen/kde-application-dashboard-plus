@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.4 — 2026-11-06 — Preview icon and understated search field
+
+- Use the bundled `contents/screenshot.png` as the widget picker/alternatives
+  preview by referencing it in the plugin's icon metadata.
+- Replace the dashboard search field's solid dark background with a transparent
+  background and a faint outline only while the search field has focus.
+- Retain the initial favorite focus, type-to-search, navigation and IME behavior.
+- Check the screenshot and visual style in the package regression checks.
+
 ## 0.1.3 — 2026-11-05 — Reload Plasma Shell automatically after install/update
 
 - Restart only the user's Plasma Shell after a successful installation or update,

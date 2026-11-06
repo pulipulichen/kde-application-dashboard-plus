@@ -4,8 +4,10 @@ A fullscreen application launcher for **Kubuntu 24.04, KDE Plasma 5.27 and Qt 5.
 on X11**, based on KDE's Application Dashboard. It installs alongside the original
 launcher under the separate ID `com.pulipuli.applicationdashboardplus`.
 
-- A visible search field receives focus immediately, supports Chinese input
-  through your existing Qt-compatible input method, and searches committed text.
+- The first favorite receives focus when the dashboard opens. Typing printable
+  characters moves focus to the search field; arrow keys navigate the grid.
+  Search has a transparent background with a subtle focus outline, supports
+  Chinese input and searches only committed text.
 - Search results do not steal the editor's focus while you compose characters.
 - Opening another Plus dashboard closes the previous one, including instances
   in other panels or screens in the same plasmashell process.
@@ -13,6 +15,8 @@ launcher under the separate ID `com.pulipuli.applicationdashboardplus`.
 - Favorites, categories, KRunner results, widgets and launcher configuration
   retain the upstream interface. Favorites use a separate namespace.
 - English, Traditional Chinese, Simplified Chinese and Japanese UI catalogs.
+- The widget picker and Show Alternatives use the bundled
+  `package/contents/screenshot.png` preview, rather than a generic gear icon.
 
 ## Install a precompiled Release (recommended)
 
@@ -64,8 +68,10 @@ Development builds get unique prerelease tags; version tags get matching Release
 
 ## Use
 
-Open the launcher and type using your normal Chinese input method. The input
-method must already work in other Qt applications; this widget does not install
+Open the launcher to select the first favorite, or type to search using your
+normal Chinese input method. Arrow keys navigate favorites and categories
+without activating the search editor. The input method must already work in
+other Qt applications; this widget does not install
 or reconfigure Fcitx/IBus. Chinese input support does not add translation,
 phonetic matching, or Traditional/Simplified query conversion to KRunner.
 

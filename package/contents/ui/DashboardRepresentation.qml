@@ -276,6 +276,15 @@ DashboardPlus.DashboardWindow {
             selectByMouse: true
             persistentSelection: true
 
+            // Keep search visually integrated with the fullscreen backdrop.
+            // Only show a subtle border while actively editing.
+            background: Rectangle {
+                color: "transparent"
+                radius: PlasmaCore.Units.smallSpacing
+                border.width: searchField.activeFocus ? 1 : 0
+                border.color: Qt.rgba(1, 1, 1, 0.18)
+            }
+
             // text excludes the IME preedit: only committed characters are searched.
             onTextChanged: {
                 if (tabBar.activeTab === 0) {

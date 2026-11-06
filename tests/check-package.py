@@ -10,6 +10,13 @@ package = root / 'package'
 metadata = json.loads((package / 'metadata.json').read_text())
 assert metadata['KPlugin']['Id'] == 'com.pulipuli.applicationdashboardplus'
 assert (package / 'contents' / metadata['X-Plasma-MainScript']).is_file()
+# The widget picker/alternatives preview is bundled in the plasmoid.
+preview = package / 'contents/screenshot.png'
+assert preview.is_file() and preview.read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
+assert metadata['KPlugin']['Icon'] == '/screenshot.png'
+dashboard = (package / 'contents/ui/DashboardRepresentation.qml').read_text()
+assert 'background: Rectangle {' in dashboard
+assert 'color: "transparent"' in dashboard
 ET.parse(package / 'contents/config/main.xml')
 for name in ('main.qml', 'ConfigGeneral.qml'):
     text = (package / 'contents/ui' / name).read_text()
