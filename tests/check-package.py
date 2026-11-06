@@ -31,7 +31,15 @@ clear_button = dashboard.split('id: cancelSearchButton', 1)[1].split('id: middle
 assert 'Accessible.role: Accessible.Button' in clear_button
 assert 'Accessible.name: i18n("Clear search")' in clear_button
 assert 'radius: width / 2' in clear_button
+# Style A: subtle filled grey circle, a thicker white X, and no outlined frame.
+assert 'border.width: 0' in clear_button
+assert 'border.color:' not in clear_button
+assert 'Qt.rgba(1, 1, 1, 0.22)' in clear_button
+assert 'Qt.rgba(1, 1, 1, 0.30)' in clear_button
+assert 'color: "white"' in clear_button
+assert 'width: parent.width * 0.44' in clear_button
 assert 'rotation: index === 0 ? 45 : -45' in clear_button
+assert 'visible: searchField.text !== ""' in clear_button
 assert 'iconName: "edit-clear"' not in clear_button
 assert 'onClicked: cancelSearchButton.clearSearch()' in clear_button
 assert 'Qt.Key_Space' in clear_button and 'Qt.Key_Return' in clear_button

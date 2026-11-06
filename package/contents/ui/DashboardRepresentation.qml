@@ -313,7 +313,7 @@ DashboardPlus.DashboardWindow {
             }
         }
 
-        // Draw the clear affordance directly: no native button frame or glyph.
+        // Soft filled circle with a white X (style A), no outline or native frame.
         FocusScope {
             id: cancelSearchButton
 
@@ -341,18 +341,19 @@ DashboardPlus.DashboardWindow {
                 radius: width / 2
                 antialiasing: true
                 color: clearMouseArea.containsMouse || cancelSearchButton.activeFocus
-                    ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
-                border.width: 1
-                border.color: Qt.rgba(1, 1, 1, 0.7)
+                    ? Qt.rgba(1, 1, 1, 0.30) : Qt.rgba(1, 1, 1, 0.22)
+                border.width: 0
+
+                Behavior on color { ColorAnimation { duration: 120 } }
 
                 Repeater {
                     model: 2
                     Rectangle {
                         anchors.centerIn: parent
-                        width: parent.width * 0.4
-                        height: 2
+                        width: parent.width * 0.44
+                        height: Math.max(2, Math.round(parent.width * 0.09))
                         radius: height / 2
-                        color: Qt.rgba(1, 1, 1, 0.9)
+                        color: "white"
                         rotation: index === 0 ? 45 : -45
                         antialiasing: true
                     }
