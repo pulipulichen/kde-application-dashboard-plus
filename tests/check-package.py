@@ -13,7 +13,7 @@ assert (package / 'contents' / metadata['X-Plasma-MainScript']).is_file()
 # The widget picker/alternatives preview is bundled in the plasmoid.
 preview = package / 'contents/screenshot.png'
 assert preview.is_file() and preview.read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
-assert metadata['KPlugin']['Icon'] == '/screenshot.png'
+assert metadata['KPlugin']['Icon'] == metadata['KPlugin']['Id']
 dashboard = (package / 'contents/ui/DashboardRepresentation.qml').read_text()
 assert 'background: Rectangle {' in dashboard
 assert 'color: "transparent"' in dashboard

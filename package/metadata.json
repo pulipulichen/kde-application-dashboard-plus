@@ -9,8 +9,8 @@
         "Description[zh_TW]": "支援中文輸入與單一選單開啟的全螢幕啟動器",
         "Description[zh_CN]": "支持中文输入与单一菜单开启的全屏启动器",
         "Description[ja]": "中国語入力と単一表示に対応した全画面ランチャー",
-        "Icon": "/screenshot.png",
-        "Version": "0.1.4",
+        "Icon": "com.pulipuli.applicationdashboardplus",
+        "Version": "0.1.5",
         "License": "GPL-3.0-or-later",
         "Category": "Application Launchers",
         "ServiceTypes": [

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.5 — 2026-11-06 — Reliable KDE 5 preview and synchronized updates
+
+- Register the packaged `screenshot.png` under the current user's hicolor icon
+  theme, and reference its name from metadata. KDE's alternatives dialog can
+  resolve this reliably even when relative metadata paths are unsupported.
+- Remove the user-level icon when uninstalling the widget.
+- Make installs from Git checkouts require a Release built from the exact local
+  Git commit, rather than silently downloading an older successful build.
+- Add regression tests for icon installation and commit-pinned Release selection.
+
 ## 0.1.4 — 2026-11-06 — Preview icon and understated search field
 
 - Use the bundled `contents/screenshot.png` as the widget picker/alternatives

@@ -17,6 +17,18 @@ class ReleaseDownloadTest(unittest.TestCase):
         release, _ = downloader.select_release(releases)
         self.assertEqual(release['tag_name'], 'build-1')
 
+    def test_release_must_match_source_commit(self):
+        assets = [{'name': downloader.PACKAGE}, {'name': 'SHA256SUMS'}]
+        sha_old, sha_new = 'a' * 40, 'b' * 40
+        releases = [
+            {'tag_name': 'old', 'target_commitish': sha_old, 'assets': assets},
+            {'tag_name': 'new', 'target_commitish': sha_new, 'assets': assets},
+        ]
+        release, _ = downloader.select_release(releases, required_commit=sha_new)
+        self.assertEqual(release['tag_name'], 'new')
+        with self.assertRaisesRegex(ValueError, 'not published yet'):
+            downloader.select_release(releases, required_commit='c' * 40)
+
     def test_missing_release_is_clear(self):
         with self.assertRaisesRegex(ValueError, 'No finished amd64 release'):
             downloader.select_release([])

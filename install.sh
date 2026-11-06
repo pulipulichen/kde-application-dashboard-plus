@@ -38,7 +38,14 @@ case "${1:-}" in
             command -v python3 >/dev/null || { echo 'python3 is required to download the Release.' >&2; exit 1; }
             download_dir="$(mktemp -d)"
             trap 'rm -rf -- "$download_dir"' EXIT
-            package="$(python3 "$project_dir/download-release.py" "$download_dir")"
+            download_args=("$download_dir")
+            # A source checkout must install the Release built from THAT checkout.
+            # An older successful build is not a valid substitute for a pending one.
+            if [[ -d "$project_dir/.git" ]] && command -v git >/dev/null 2>&1; then
+                checkout_commit="$(git -C "$project_dir" rev-parse HEAD)"
+                download_args+=(--require-commit "$checkout_commit")
+            fi
+            package="$(python3 "$project_dir/download-release.py" "${download_args[@]}")"
         fi
         ;;
     *) echo 'Usage: ./install.sh [--build | --package FILE] [--no-restart]' >&2; exit 1 ;;
@@ -48,6 +55,21 @@ if kpackagetool5 --type Plasma/Applet --show "$plugin_id" >/dev/null 2>&1; then
     kpackagetool5 --type Plasma/Applet --upgrade "$package"
 else
     kpackagetool5 --type Plasma/Applet --install "$package"
+fi
+# KDE 5 alternatives/widget explorer resolves an icon theme name, not the
+# relative screenshot.png path in metadata. Register the packaged preview in
+# the user icon theme so it works without root or a hard-coded home directory.
+data_home="${XDG_DATA_HOME:-$HOME/.local/share}"
+preview="$data_home/plasma/plasmoids/$plugin_id/contents/screenshot.png"
+icon="$data_home/icons/hicolor/256x256/apps/$plugin_id.png"
+if [[ ! -s "$preview" ]]; then
+    echo "Missing bundled preview after installation: $preview" >&2
+    exit 1
+fi
+install -Dm644 "$preview" "$icon"
+printf 'Installed widget preview icon: %s\n' "$icon"
+if command -v kbuildsycoca5 >/dev/null 2>&1; then
+    kbuildsycoca5 --noincremental >/dev/null 2>&1 || echo 'KService cache refresh failed; Plasma restart should still reload the icon.' >&2
 fi
 restart_plasma_shell() {
     if [[ $restart_plasma == false ]]; then

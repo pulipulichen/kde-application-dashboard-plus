@@ -16,7 +16,8 @@ launcher under the separate ID `com.pulipuli.applicationdashboardplus`.
   retain the upstream interface. Favorites use a separate namespace.
 - English, Traditional Chinese, Simplified Chinese and Japanese UI catalogs.
 - The widget picker and Show Alternatives use the bundled
-  `package/contents/screenshot.png` preview, rather than a generic gear icon.
+  `package/contents/screenshot.png` preview via a user-level icon theme entry,
+  rather than depending on relative file paths in Plasma's metadata.
 
 ## Install a precompiled Release (recommended)
 
@@ -44,9 +45,17 @@ git pull --ff-only
 ./install.sh
 ```
 
-Without a bundled package, the installer downloads the newest complete Release
-(including development prereleases) and verifies its SHA-256 checksum. It does
-not compile locally. You do not need to run `install-deps.sh` for normal installation.
+Without a bundled package, the installer downloads a complete Release and
+verifies its SHA-256 checksum. When run from a Git checkout, the Release **must
+match the checked-out Git commit**. If the GitHub Actions build has not been
+published yet, installation stops with an explanatory message rather than
+silently installing an older release. For standalone installer bundles (without
+a Git checkout), the bundled package is installed offline. You do not need to
+run `install-deps.sh` for normal installation.
+
+The install script also copies the packaged screenshot into the current user's
+`~/.local/share/icons/hicolor/256x256/apps/` (or `$XDG_DATA_HOME/icons/...`),
+so KDE's widget picker can resolve its icon reliably. No `sudo` is needed.
 
 The standalone `.plasmoid` is also available as a Release asset:
 
@@ -95,6 +104,9 @@ method's candidate popup can work without fighting the launcher.
 ```
 
 Update requires a clean `main` checkout and uses `git pull --ff-only`.
+It refuses to install a package from an older Git commit while CI is still
+building the new one. Check the GitHub Actions run, then repeat `./update.sh`
+after the matching Release is published.
 Both `./install.sh` and `./update.sh` automatically restart Plasma Shell after
 a successful install/update to reload QML and the native plugin, without
 logging out. To leave Plasma Shell running (for example, when installing

@@ -23,6 +23,11 @@ class InstallerRestartTests(unittest.TestCase):
         for name in ("install.sh", "update.sh"):
             shutil.copy2(SOURCE / name, self.root / name)
         (self.root / PACKAGE).write_text("mock plasmoid\n")
+        self.data_home = self.root / "user-data"
+        self.preview = self.data_home / "plasma/plasmoids/com.pulipuli.applicationdashboardplus/contents/screenshot.png"
+        self.preview.parent.mkdir(parents=True)
+        self.preview.write_bytes(b"\x89PNG\r\n\x1a\nmock preview")
+        self.icon = self.data_home / "icons/hicolor/256x256/apps/com.pulipuli.applicationdashboardplus.png"
         self.log = self.root / "actions.log"
         self.env = os.environ.copy()
         self.env.update({
@@ -31,6 +36,8 @@ class InstallerRestartTests(unittest.TestCase):
             "MOCK_SYSTEMCTL_ACTIVE": "1",
             "MOCK_PGREP_ACTIVE": "0",
             "DISPLAY": ":99",
+            "XDG_DATA_HOME": str(self.data_home),
+            "MOCK_REMOTE_PACKAGE": str(self.root / "remote.plasmoid"),
             "WAYLAND_DISPLAY": "",
         })
         self.mock("plasmashell", """#!/bin/sh
@@ -62,6 +69,7 @@ case "$1" in
     branch) echo main ;;
     status) : ;;
     pull) printf 'git %s\n' "$*" >> "$MOCK_LOG" ;;
+    -C) echo 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' ;;
     *) exit 1 ;;
 esac
 """)
@@ -87,6 +95,22 @@ esac
         self.run_script("install.sh")
         self.assertIn("kpackagetool5 --type Plasma/Applet --install", self.log_text())
         self.assertIn("systemctl --user restart plasma-plasmashell.service", self.log_text())
+
+    def test_install_registers_preview_in_user_icon_theme(self):
+        self.run_script("install.sh")
+        self.assertEqual(self.icon.read_bytes(), self.preview.read_bytes())
+
+    def test_source_checkout_requests_matching_release(self):
+        (self.root / ".git").mkdir()
+        (self.root / PACKAGE).unlink()
+        (self.root / "remote.plasmoid").write_text("downloaded package\n")
+        self.mock("python3", """#!/bin/sh
+printf 'python3 %s\n' "$*" >> "$MOCK_LOG"
+printf '%s\n' "$MOCK_REMOTE_PACKAGE"
+""")
+        self.run_script("update.sh")
+        self.assertIn("--require-commit bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", self.log_text())
+        self.assertEqual(self.icon.read_bytes(), self.preview.read_bytes())
 
     def test_install_no_restart_option(self):
         self.run_script("install.sh", "--no-restart")
