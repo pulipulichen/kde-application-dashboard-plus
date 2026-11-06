@@ -17,6 +17,11 @@ assert metadata['KPlugin']['Icon'] == metadata['KPlugin']['Id']
 dashboard = (package / 'contents/ui/DashboardRepresentation.qml').read_text()
 assert 'background: Rectangle {' in dashboard
 assert 'color: "transparent"' in dashboard
+# The search box must track the Applications grid when screen size changes.
+search_field = dashboard.split('id: searchField', 1)[1].split('PlasmaComponents.ToolButton', 1)[0]
+assert 'x: middleRow.x + mainColumn.x' in search_field
+assert 'width: mainColumn.width' in search_field
+assert 'anchors.horizontalCenter: parent.horizontalCenter' not in search_field
 ET.parse(package / 'contents/config/main.xml')
 for name in ('main.qml', 'ConfigGeneral.qml'):
     text = (package / 'contents/ui' / name).read_text()
