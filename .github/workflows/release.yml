@@ -22,17 +22,15 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Install build and Plasma 5 runtime dependencies
+      - name: Install build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             build-essential cmake qtbase5-dev qtdeclarative5-dev \
-            libkf5windowsystem-dev gettext python3 \
-            plasma-workspace plasma-desktop qml-module-qtquick-controls2
-      - name: Build, test, and package
+            libkf5windowsystem-dev gettext python3
+      - name: Build and package
         env:
-          QT_QPA_PLATFORM: offscreen
-          QT_QUICK_BACKEND: software
+          BUILD_TESTING: "OFF"
         run: |
           python3 tests/test-download-release.py
           python3 tests/test-installer-restart.py

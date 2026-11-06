@@ -4,9 +4,12 @@ project_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 for tool in cmake python3 msgfmt; do
     command -v "$tool" >/dev/null || { echo "Missing dependency: $tool. Run ./install-deps.sh" >&2; exit 1; }
 done
-cmake -S "$project_dir" -B "$project_dir/build" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON
+build_testing="${BUILD_TESTING:-ON}"
+cmake -S "$project_dir" -B "$project_dir/build" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING="$build_testing"
 cmake --build "$project_dir/build" --parallel "${BUILD_JOBS:-2}"
-ctest --test-dir "$project_dir/build" --output-on-failure
+if [[ "$build_testing" == ON ]]; then
+    ctest --test-dir "$project_dir/build" --output-on-failure
+fi
 python3 "$project_dir/tests/check-package.py"
 mkdir -p "$project_dir/dist"
 # Stage a fresh package so stale native binaries/translations cannot be included.

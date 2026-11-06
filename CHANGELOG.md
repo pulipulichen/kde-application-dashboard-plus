@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — 2026-11-06 — Build Releases without a Plasma desktop
+
+- Release run #12 for `52b3ef3` was cancelled at the 25-minute job timeout
+  during “Install build and Plasma 5 runtime dependencies,” before compilation.
+- CI installs the build dependencies, compiles the native plugin, checks package
+  contents, and publishes the same Release assets. The Qt runtime suite stays
+  enabled in local builds by default. Installed appearance and behavior are
+  checked on Kubuntu as described in `tests/MANUAL.md`.
+
 ## 0.1.5 — 2026-11-06 — Reliable KDE 5 preview and synchronized updates
 
 - Register the packaged `screenshot.png` under the current user's hicolor icon
