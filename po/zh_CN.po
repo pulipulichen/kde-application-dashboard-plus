@@ -209,3 +209,8 @@ msgstr "应用程序和文档"
 #, kde-format
 msgid "Edit Applications…"
 msgstr "编辑应用程序…"
+
+#: package/contents/ui/DashboardRepresentation.qml
+#, kde-format
+msgid "Clear search"
+msgstr "清除搜索"

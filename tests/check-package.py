@@ -16,12 +16,25 @@ assert preview.is_file() and preview.read_bytes().startswith(b'\x89PNG\r\n\x1a\n
 assert metadata['KPlugin']['Icon'] == metadata['KPlugin']['Id']
 dashboard = (package / 'contents/ui/DashboardRepresentation.qml').read_text()
 assert 'background: Rectangle {' in dashboard
-assert 'color: "transparent"' in dashboard
+# Empty search (even when focused) has no outline or background.
+# Non-empty search gets a subtle translucent fill without an outline.
+search_field = dashboard.split('id: searchField', 1)[1].split('id: cancelSearchButton', 1)[0]
+assert 'color: searchField.text.length ? Qt.rgba(1, 1, 1, 0.08) : "transparent"' in search_field
+assert 'border.width: 0' in search_field
+assert 'searchField.activeFocus ? 1 : 0' not in search_field
 # The search box must track the Applications grid when screen size changes.
-search_field = dashboard.split('id: searchField', 1)[1].split('PlasmaComponents.ToolButton', 1)[0]
 assert 'x: middleRow.x + mainColumn.x' in search_field
 assert 'width: mainColumn.width' in search_field
 assert 'anchors.horizontalCenter: parent.horizontalCenter' not in search_field
+# The clear affordance must be an accessible, keyboard-operable circle/X.
+clear_button = dashboard.split('id: cancelSearchButton', 1)[1].split('id: middleRow', 1)[0]
+assert 'Accessible.role: Accessible.Button' in clear_button
+assert 'Accessible.name: i18n("Clear search")' in clear_button
+assert 'radius: width / 2' in clear_button
+assert 'rotation: index === 0 ? 45 : -45' in clear_button
+assert 'iconName: "edit-clear"' not in clear_button
+assert 'onClicked: cancelSearchButton.clearSearch()' in clear_button
+assert 'Qt.Key_Space' in clear_button and 'Qt.Key_Return' in clear_button
 ET.parse(package / 'contents/config/main.xml')
 for name in ('main.qml', 'ConfigGeneral.qml'):
     text = (package / 'contents/ui' / name).read_text()

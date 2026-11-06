@@ -210,3 +210,8 @@ msgstr "アプリケーションと文書"
 #, kde-format
 msgid "Edit Applications…"
 msgstr "アプリケーションを編集..."
+
+#: package/contents/ui/DashboardRepresentation.qml
+#, kde-format
+msgid "Clear search"
+msgstr "検索をクリア"

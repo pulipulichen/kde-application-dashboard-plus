@@ -278,13 +278,12 @@ DashboardPlus.DashboardWindow {
             selectByMouse: true
             persistentSelection: true
 
-            // Keep search visually integrated with the fullscreen backdrop.
-            // Only show a subtle border while actively editing.
+            // Keep the field fully transparent when empty, including when focused.
+            // Typed text gets a gentle tint rather than an outlined input box.
             background: Rectangle {
-                color: "transparent"
+                color: searchField.text.length ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
                 radius: PlasmaCore.Units.smallSpacing
-                border.width: searchField.activeFocus ? 1 : 0
-                border.color: Qt.rgba(1, 1, 1, 0.18)
+                border.width: 0
             }
 
             // text excludes the IME preedit: only committed characters are searched.
@@ -314,7 +313,8 @@ DashboardPlus.DashboardWindow {
             }
         }
 
-        PlasmaComponents.ToolButton {
+        // Draw the clear affordance directly: no native button frame or glyph.
+        FocusScope {
             id: cancelSearchButton
 
             anchors {
@@ -323,18 +323,55 @@ DashboardPlus.DashboardWindow {
                 verticalCenter: searchField.verticalCenter
             }
 
-            width: PlasmaCore.Units.iconSizes.large
+            width: PlasmaCore.Units.iconSizes.medium
             height: width
+            visible: searchField.text !== ""
 
-            visible: (searchField.text !== "")
+            Accessible.role: Accessible.Button
+            Accessible.name: i18n("Clear search")
+            Accessible.onPressAction: clearSearch()
 
-            iconName: "edit-clear"
-            flat: false
+            function clearSearch() {
+                searchField.clear();
+                searchField.forceActiveFocus();
+            }
 
-            onClicked: { searchField.clear(); searchField.forceActiveFocus(); }
+            Rectangle {
+                anchors.fill: parent
+                radius: width / 2
+                antialiasing: true
+                color: clearMouseArea.containsMouse || cancelSearchButton.activeFocus
+                    ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+                border.width: 1
+                border.color: Qt.rgba(1, 1, 1, 0.7)
+
+                Repeater {
+                    model: 2
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: parent.width * 0.4
+                        height: 2
+                        radius: height / 2
+                        color: Qt.rgba(1, 1, 1, 0.9)
+                        rotation: index === 0 ? 45 : -45
+                        antialiasing: true
+                    }
+                }
+            }
+
+            MouseArea {
+                id: clearMouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: cancelSearchButton.clearSearch()
+            }
 
             Keys.onPressed: event => {
-                if (event.key === Qt.Key_Tab) {
+                if (event.key === Qt.Key_Space || event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                    event.accepted = true;
+                    clearSearch();
+                } else if (event.key === Qt.Key_Tab) {
                     event.accepted = true;
 
                     if (runnerModel.count) {

@@ -220,3 +220,8 @@ msgstr "編輯應用程式…"
 
 #~ msgid "Often used documents"
 #~ msgstr "經常使用的文件"
+
+#: package/contents/ui/DashboardRepresentation.qml
+#, kde-format
+msgid "Clear search"
+msgstr "清除搜尋"
